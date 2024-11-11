@@ -1,7 +1,7 @@
 'use client'
 
-import { use, useEffect, useState } from 'react'
-import { Search, ArrowLeft, Plus, Minus, Printer } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Search, ArrowLeft} from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
@@ -11,6 +11,7 @@ import { Table, TableProps } from "./table"
 import { OrderSummary } from './order_summary'
 import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 
 
@@ -98,7 +99,7 @@ export default function RestaurantBilling() {
     
         fetchDataAndSubscribe();
     
-    }, []);
+    });
 
     if (loading) {
         return (
@@ -108,7 +109,11 @@ export default function RestaurantBilling() {
             alignItems: 'center',
             height: '100vh'
           }}>
-            <img src="burger.gif" alt="Loading..." />
+            <Image
+              src="/burger.gif"
+              alt="BunniesBurger"
+            />
+
           </div>
         );
       }
@@ -125,7 +130,7 @@ export default function RestaurantBilling() {
             console.log("Error fetching categories: ", error)
         }
         if (data) {
-            setCategories(data.map((category: any) => category.name))
+            setCategories(data.map((category) => category.name))
         }
         console.log("categories", categories)
     }
@@ -140,7 +145,7 @@ export default function RestaurantBilling() {
         }
         if (data) {
             console.log("tables", data)
-            setTables(data.map((table: any) => {
+            setTables(data.map((table) => {
                 return({
                     key: table.key,
                     name: table.name,
@@ -151,7 +156,7 @@ export default function RestaurantBilling() {
     }
 
     function firstAvailableTable() : number {
-        let n = tables.length;
+        const n = tables.length;
         const seen: boolean[] = new Array(n + 1).fill(false);
 
         for (const table of tables) {
@@ -181,7 +186,7 @@ export default function RestaurantBilling() {
             console.error('Error fetching dishes with categories:', error);
         } else {
             setDishes(
-                data.map((dish: any) => {
+                data.map((dish) => {
                     return ({
                         key: dish.key,
                         name: dish.name,

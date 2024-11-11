@@ -19,7 +19,6 @@ type OrderSummaryProps = {
 };
 
 export function OrderSummary({
-  tableName,
   dishes,
   dishQuantity,
   onIncrease,

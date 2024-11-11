@@ -31,6 +31,9 @@ export default function LoginPage() {
       password: password
     })
 
+    if (data) {
+    }
+
     if (error) {
       console.log(error)
     }
