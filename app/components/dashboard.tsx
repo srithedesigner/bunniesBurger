@@ -374,8 +374,21 @@ export default function RestaurantBilling() {
     }
 
     return (
-        <div className="container mx-auto p-6 max-w-7xl">
-            <h1 className="text-4xl font-bold mb-8 text-center text-primary">BunniesBurger</h1>
+        <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background">
+        <header className="bg-primary text-primary-foreground p-4 shadow-md">
+            <div className="container mx-auto flex justify-between items-center">
+                <h1 className="text-3xl font-bold">BunniesBurger</h1>
+                    <div className="flex items-center gap-4">
+                        <span className="flex items-center gap-2">
+                            Hi, User
+                        </span>
+                        <Button variant="secondary" size="sm">
+                            Logout
+                        </Button>
+                    </div>
+            </div>
+        </header>
+        <main className="container mx-auto p-6 max-w-7xl">
 
             {!selectedTable ? (
                 <div>
@@ -470,6 +483,7 @@ export default function RestaurantBilling() {
                     </div>
                 </div>
             )}
+        </main>
         </div>
     )
 }

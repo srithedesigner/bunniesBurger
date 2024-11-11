@@ -7,7 +7,7 @@ export interface TableProps {
   onClick?: () => void
 }
 
-export function Table({name, total, onClick }: TableProps) {
+export function Table({ name, total, onClick }: TableProps) {
   return (
     <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={onClick}>
       <CardHeader className="p-4">
