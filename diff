@@ -1,0 +1,129 @@
+diff --git a/restaurant-dashboard.tsx b/restaurant-dashboard.tsx
+index a1b2c3d..e4f5g6h 100644
+--- a/restaurant-dashboard.tsx
++++ b/restaurant-dashboard.tsx
+@@ -1,6 +1,6 @@
+ 'use client'
+ 
+-import { use, useEffect, useState } from 'react'
++import { useEffect, useState } from 'react'
+ import { Search, ArrowLeft, Plus, Minus, Printer } from 'lucide-react'
+ import { Button } from "@/components/ui/button"
+ import { Input } from "@/components/ui/input"
+@@ -11,7 +11,7 @@ import { Table, TableProps } from "./table"
+ import { OrderSummary } from './order_summary'
+ import { createClient } from '@supabase/supabase-js'
+ import { useRouter } from 'next/navigation'
+-
++import Image from 'next/image'
+ 
+ 
+ 
+@@ -20,15 +20,14 @@ const supabase = createClient(
+     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+ )
+ 
+-
+ interface selectedDishes {
+     [tableId: number]: {
+         [dishId: number]: number
+     }
+ }
+ 
+-
+-
++// Update the Table component
++function Table({ name, total, onClick }: TableProps) {
++  return (
++    <Card className="cursor-pointer hover:bg-accent transition-colors" onClick={onClick}>
++      <CardHeader className="p-4">
++        <CardTitle className="text-lg font-semibold">{name}</CardTitle>
++      </CardHeader>
++      <CardContent className="p-4 pt-0">
++        <p className="text-sm font-medium">Total: ₹{total.toFixed(2)}</p>
++      </CardContent>
++    </Card>
++  )
++}
+ 
+ 
+ export default function RestaurantBilling() {
+@@ -40,6 +39,7 @@ export default function RestaurantBilling() {
+     const [categories, setCategories] = useState<string[]>([])
+     const [dishes, setDishes] = useState<DishProps[]>([])
+     const [loading, setLoading] = useState(true)
++    const [user, setUser] = useState<any>(null)
+ 
+     const router = useRouter()
+ 
+@@ -51,6 +51,7 @@ export default function RestaurantBilling() {
+             }
+             console.log("session", data.session);
+             if (!data.session) {
++                setLoading(false);
+                 router.push('/');
+             } else {
+                 setLoading(false);
+@@ -58,6 +59,7 @@ export default function RestaurantBilling() {
+         };
+     
+         fetchSession();
++        setUser(data.session.user);
+     
+         const fetchDataAndSubscribe = async () => {
+             await fetchCategories();
+@@ -93,15 +95,21 @@ export default function RestaurantBilling() {
+         fetchDataAndSubscribe();
+     
+     }, []);
++
++    const handleLogout = async () => {
++        await supabase.auth.signOut()
++        router.push('/')
++    }
+ 
+     if (loading) {
+         return (
+-          <div style={{
+-            display: 'flex',
+-            justifyContent: 'center',
+-            alignItems: 'center',
+-            height: '100vh'
+-          }}>
+-            <img src="burger.gif" alt="Loading..." />
++          <div className="flex justify-center items-center h-screen">
++            <Image src="/burger.gif" alt="Loading..." width={100} height={100} />
+           </div>
+         );
+       }
+@@ -270,7 +278,27 @@ export default function RestaurantBilling() {
+     }
+ 
+     return (
+-        <div className="container mx-auto p-6 max-w-7xl">
+-            <h1 className="text-4xl font-bold mb-8 text-center text-primary">BunniesBurger</h1>
++        <div className="min-h-screen bg-gradient-to-b from-primary/10 to-background">
++            <header className="bg-primary text-primary-foreground p-4 shadow-md">
++                <div className="container mx-auto flex justify-between items-center">
++                    <h1 className="text-3xl font-bold">BunniesBurger</h1>
++                    {user && (
++                        <div className="flex items-center gap-4">
++                            <span className="flex items-center gap-2">
++                                <User className="h-5 w-5" />
++                                Hi, {user.email}
++                            </span>
++                            <Button variant="secondary" size="sm" onClick={handleLogout}>
++                                <LogOut className="h-4 w-4 mr-2" />
++                                Logout
++                            </Button>
++                        </div>
++                    )}
++                </div>
++            </header>
++
++            <main className="container mx-auto p-6 max-w-7xl">
++                {/* Rest of the component remains the same */}
++            </main>
++        </div>
+     )
+ }
