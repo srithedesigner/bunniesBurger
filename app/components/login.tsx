@@ -21,11 +21,10 @@ const supabase = createClient(
 export default function LoginPage() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [authenticated, setAuthenticated] = useState(false)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const router = useRouter()
 
-  async function authenticate(username: string, password: string) {
+  async function authenticate(username: string, password: string){
     const {data, error} = await supabase.auth.signInWithPassword ({
       email: username,
       password: password
@@ -38,15 +37,18 @@ export default function LoginPage() {
       console.log(error)
     }
     if (supabase.auth.getSession() !== null) {
-      setAuthenticated(true)
+      return true
+    }
+    else {
+      return false
     }
 
   }
 
-  const handleLogin = (e: React.FormEvent) => {
+  async function handleLogin (e: React.FormEvent) {
     e.preventDefault()
-    authenticate(username, password)
-    if (authenticated) {
+    const result = await authenticate(username, password);
+    if (result) {
       router.push('/dashboard')
     } else {
       setShowErrorModal(true)

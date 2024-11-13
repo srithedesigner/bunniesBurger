@@ -12,6 +12,8 @@ import { OrderSummary } from './order_summary'
 import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import Orders from './orders'
+import { OrderProps } from './orders'
 
 
 
@@ -41,8 +43,19 @@ export default function RestaurantBilling() {
     const [categories, setCategories] = useState<string[]>([])
     const [dishes, setDishes] = useState<DishProps[]>([])
     const [loading, setLoading] = useState(true)
+    const [user, setUser] = useState<string | undefined>("user");
+    const [orderList, setOrderList] = useState<OrderProps[]>([])
 
     const router = useRouter()
+
+    async function handleLogout() {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            console.log("Error signing out: ", error);
+        } else {
+            router.push('/');
+        }
+    }
 
     useEffect(() => {
         const fetchSession = async () => {
@@ -54,6 +67,7 @@ export default function RestaurantBilling() {
             if (!data.session) {
                 router.push('/');
             } else {
+                setUser(data.session.user.email);
                 setLoading(false);
             }
         };
@@ -99,7 +113,7 @@ export default function RestaurantBilling() {
     
         fetchDataAndSubscribe();
     
-    });
+    }, []);
 
     if (loading) {
         return (
@@ -112,6 +126,8 @@ export default function RestaurantBilling() {
             <Image
               src="/burger.gif"
               alt="BunniesBurger"
+              width={200}
+                height={200}
             />
 
           </div>
@@ -383,11 +399,12 @@ export default function RestaurantBilling() {
         <header className="bg-primary text-primary-foreground p-4 shadow-md">
             <div className="container mx-auto flex justify-between items-center">
                 <h1 className="text-3xl font-bold">BunniesBurger</h1>
+                
                     <div className="flex items-center gap-4">
                         <span className="flex items-center gap-2">
-                            Hi, User
+                            Hi, {user}
                         </span>
-                        <Button variant="secondary" size="sm">
+                        <Button variant="secondary" size="sm" onClick={handleLogout}>
                             Logout
                         </Button>
                     </div>
@@ -397,8 +414,12 @@ export default function RestaurantBilling() {
 
             {!selectedTable ? (
                 <div>
+                        <Orders/>
+                    
                     <div className="flex justify-between items-center mb-6">
+                    
                         <h2 className="text-3xl font-semibold">Tables</h2>
+                        
                         <Dialog>
                             <DialogTrigger asChild>
                                 <Button size="lg">Add New table</Button>
@@ -411,7 +432,9 @@ export default function RestaurantBilling() {
                             </DialogContent>
                         </Dialog>
                     </div>
+                    
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        
                         {tables.map(table => (
                             <Table
                                 key={table.key}
@@ -438,7 +461,6 @@ export default function RestaurantBilling() {
                                 dishQuantity={selectedDishes[selectedTable.key] || {}}
                                 onIncrease={(dishId: number) => addDish(selectedTable.key, dishId)}
                                 onDecrease={(dishId: number) => removeDish(selectedTable.key, dishId)}
-                                onPrint={() => window.print()}
                             />
                         </div>
                         <div className="w-full lg:w-1/2">

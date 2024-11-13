@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Plus, Minus, Printer } from "lucide-react"
+import { Plus, Minus, Printer } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { DishProps } from "./dish"
@@ -15,15 +15,14 @@ type OrderSummaryProps = {
   dishQuantity: Record<number, number>;
   onIncrease: (dishId: number) => void;
   onDecrease: (dishId: number) => void;
-  onPrint: () => void;
 };
 
 export function OrderSummary({
+  tableName,
   dishes,
   dishQuantity,
   onIncrease,
-  onDecrease,
-  onPrint
+  onDecrease
 }: OrderSummaryProps) {
   const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false)
   const [paymentMethod, setPaymentMethod] = useState<'UPI' | 'Cash' | null>(null)
@@ -31,6 +30,9 @@ export function OrderSummary({
   const [cashAmount, setCashAmount] = useState('')
   const [change, setChange] = useState(0)
   const [showChangeModal, setShowChangeModal] = useState(false)
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false)
+  const [printType, setPrintType] = useState<'Bill' | 'KOT' | null>(null)
+  const printContentRef = useRef<HTMLDivElement>(null)
 
   const subtotal = dishes.reduce((total, dish) => total + dish.price * dishQuantity[dish.key], 0);
   const gst = subtotal * 0.1;
@@ -57,6 +59,59 @@ export function OrderSummary({
   const handleUPIFailure = () => {
     setIsUPICompleted(false)
     setPaymentMethod(null)
+  }
+
+  const handlePrint = () => {
+    if (printContentRef.current) {
+      const printWindow = window.open('', '', 'width=85mm')
+      printWindow?.document.write(`
+        <html>
+          <head>
+            <style>
+              body {
+                font-family: 'Courier New', monospace;
+                width: 85mm;
+                margin: 0;
+                padding: 10px;
+              }
+              h1, h2 {
+                text-align: center;
+                margin: 5px 0;
+              }
+              table {
+                width: 100%;
+                border-collapse: collapse;
+              }
+              th, td {
+                text-align: left;
+                padding: 2px 0;
+              }
+              .right {
+                text-align: right;
+              }
+              .center {
+                text-align: center;
+              }
+              .total {
+                font-weight: bold;
+                border-top: 1px dashed black;
+                margin-top: 5px;
+                padding-top: 5px;
+              }
+            </style>
+          </head>
+          <body>
+            ${printContentRef.current.innerHTML}
+          </body>
+        </html>
+      `)
+      printWindow?.document.close()
+      printWindow?.focus()
+      printWindow?.print()
+      printWindow?.close()
+    }
+    setIsPrintModalOpen(false)
+    setPrintType(null)
   }
 
   return (
@@ -90,7 +145,56 @@ export function OrderSummary({
         <p className="text-xl font-bold flex justify-between"><span>Total:</span> <span>₹{total.toFixed(2)}</span></p>
       </div>
       <div className="flex gap-4 mt-6">
-        <Button className="flex-1" onClick={onPrint}><Printer className="mr-2 h-4 w-4" /> Print Bill</Button>
+        <Dialog open={isPrintModalOpen} onOpenChange={setIsPrintModalOpen}>
+          <DialogTrigger asChild>
+            <Button className="flex-1"><Printer className="mr-2 h-4 w-4" /> Print</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Select Print Type</DialogTitle>
+            </DialogHeader>
+            <div className="flex gap-4">
+              <Button onClick={() => setPrintType('Bill')} className="flex-1">Bill</Button>
+              <Button onClick={() => setPrintType('KOT')} className="flex-1">KOT</Button>
+            </div>
+            {printType && (
+              <div className="mt-4">
+                <div ref={printContentRef} className="hidden">
+                  <h1>{printType === 'Bill' ? 'Bill' : 'Kitchen Order Ticket (KOT)'}</h1>
+                  <h2>Table: {tableName}</h2>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Item</th>
+                        <th className="right">Qty</th>
+                        {printType === 'Bill' && <th className="right">Price</th>}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dishes.map((dish) => (
+                        dishQuantity[dish.key] > 0 && (
+                          <tr key={dish.key}>
+                            <td>{dish.name}</td>
+                            <td className="right">{dishQuantity[dish.key]}</td>
+                            {printType === 'Bill' && <td className="right">₹{(dish.price * dishQuantity[dish.key]).toFixed(2)}</td>}
+                          </tr>
+                        )
+                      ))}
+                    </tbody>
+                  </table>
+                  {printType === 'Bill' && (
+                    <>
+                      <p className="right">Subtotal: ₹{subtotal.toFixed(2)}</p>
+                      <p className="right">GST (10%): ₹{gst.toFixed(2)}</p>
+                      <p className="right total">Total: ₹{total.toFixed(2)}</p>
+                    </>
+                  )}
+                </div>
+                <Button onClick={handlePrint} className="w-full mt-4">Print {printType}</Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
         <Dialog open={isTransactionModalOpen} onOpenChange={setIsTransactionModalOpen}>
           <DialogTrigger asChild>
             <Button className="flex-1">Complete Transaction</Button>
