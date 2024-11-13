@@ -13,7 +13,7 @@ import { createClient } from '@supabase/supabase-js'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Orders from './orders'
-import { OrderProps } from './orders'
+// import { OrderProps } from './orders'
 
 
 
@@ -44,7 +44,7 @@ export default function RestaurantBilling() {
     const [dishes, setDishes] = useState<DishProps[]>([])
     const [loading, setLoading] = useState(true)
     const [user, setUser] = useState<string | undefined>("user");
-    const [orderList, setOrderList] = useState<OrderProps[]>([])
+    // const [orderList, setOrderList] = useState<OrderProps[]>([])
 
     const router = useRouter()
 

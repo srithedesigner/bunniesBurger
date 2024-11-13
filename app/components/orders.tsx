@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { CalendarIcon, List, SearchIcon } from 'lucide-react'
-import { format, isToday, parseISO, startOfDay, endOfDay } from 'date-fns'
+import { SearchIcon } from 'lucide-react'
+import { format, parseISO } from 'date-fns'
 import { Calendar } from "@/components/ui/calendar"
 
 const orderList = [
@@ -73,7 +73,7 @@ export default function Orders() {
             <div className="grid gap-6 md:grid-cols-4 lg:grid-cols-3">
                 <Card>
                     <CardHeader>
-                        <CardTitle>Today's Orders</CardTitle>
+                        <CardTitle>Todays Orders</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="text-3xl font-bold">{todaysTotalOrders}</p>
@@ -81,7 +81,7 @@ export default function Orders() {
                 </Card>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Today's Revenue</CardTitle>
+                        <CardTitle>Todays Revenue</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p className="text-3xl font-bold">₹{todaysTotalRevenue.toFixed(2)}</p>
